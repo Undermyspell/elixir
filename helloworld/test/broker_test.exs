@@ -1,4 +1,4 @@
-defmodule VotingTest do
+defmodule Voting.Broker.Tests do
   use ExUnit.Case, async: true
 
   setup do
