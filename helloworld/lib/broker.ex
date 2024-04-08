@@ -6,16 +6,16 @@ defmodule Voting.Broker do
     GenServer.start_link(__MODULE__, :ok, opts)
   end
 
-  def subscribe(server, pid, useremail) do
-    GenServer.call(server, {:subscribe, pid, useremail})
+  def subscribe(server, useremail, func) do
+    GenServer.call(server, {:subscribe, useremail, func})
   end
 
   def notifyall(server) do
     GenServer.cast(server, {:notifyall})
   end
 
-  def killrandom() do
-    GenServer.call(__MODULE__, {:killrandom})
+  def killrandom(server) do
+    GenServer.call(server, {:killrandom})
   end
 
   @impl true
@@ -26,16 +26,19 @@ defmodule Voting.Broker do
   end
 
   @impl true
-  def handle_call({:subscribe, pid, useremail}, _from, {userConns, refs}) do
+  def handle_call({:subscribe, useremail, func}, _from, {userConns, refs}) do
+    {:ok, pid} = Task.Supervisor.start_child(Voting.TaskSupervisor, fn -> func.() end)
+
     ref = Process.monitor(pid)
     refs = Map.put(refs, ref, useremail)
 
     if not Map.has_key?(userConns, useremail) do
       userConns = Map.put(userConns, useremail, [pid])
-      {:reply, :ok, {userConns, refs}}
+
+      {:reply, {:ok, pid}, {userConns, refs}}
     else
       userConns = Map.put(userConns, useremail, [pid | Map.get(userConns, useremail)])
-      {:reply, :ok, {userConns, refs}}
+      {:reply, {:ok, pid}, {userConns, refs}}
     end
   end
 
@@ -45,7 +48,7 @@ defmodule Voting.Broker do
     randomUserConn = userConns |> Map.keys() |> Enum.random()
     randomPid = Map.get(userConns, randomUserConn) |> Enum.random()
 
-    IO.puts("Killed process #{randomUserConn} - " <> inspect(randomPid))
+    Logger.info("Killed process #{randomUserConn} - " <> inspect(randomPid))
     Process.exit(randomPid, :notnormal)
 
     {:reply, :ok, state}
@@ -69,8 +72,7 @@ defmodule Voting.Broker do
 
   @impl true
   def handle_info({:DOWN, ref, :process, pid, _reason}, {userConns, refs}) do
-    Logger.info("DOWN")
-    IO.puts("Down message for - " <> inspect(pid))
+    Logger.info("Down message for - " <> inspect(pid))
     {userEmail, refs} = Map.pop(refs, ref)
     pids = Map.get(userConns, userEmail)
     patchedPids = List.delete(pids, pid)
@@ -82,8 +84,6 @@ defmodule Voting.Broker do
       end
 
     IO.inspect(userConns)
-
-    send(pid, {:disconnected, "User process disconnected"})
 
     {:noreply, {userConns, refs}}
   end

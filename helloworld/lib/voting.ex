@@ -1,9 +1,8 @@
 defmodule Voting do
   use Application
+  require Logger
 
   def start(_type, _args) do
-    # Helloworld.main()
-
     children = [
       {Task.Supervisor, name: Voting.TaskSupervisor},
       {Voting.Broker, name: Voting.Broker}
@@ -13,10 +12,7 @@ defmodule Voting do
   end
 
   def subscribe(useremail) do
-    {:ok, pid} = Task.Supervisor.start_child(Voting.TaskSupervisor, fn -> serve(useremail) end)
-
-    # random_number = :rand.uniform(100)
-    Voting.Broker.subscribe(Voting.Broker, pid, useremail)
+    {:ok, _} = Voting.Broker.subscribe(Voting.Broker, useremail, fn -> serve(useremail) end)
   end
 
   def notifyall() do
@@ -24,18 +20,13 @@ defmodule Voting do
   end
 
   def killrandom() do
-    Voting.Broker.killrandom()
+    Voting.Broker.killrandom(Voting.Broker)
   end
 
   defp serve(useremail) do
-    # receive do
-    #   {:disconnected, pid, msg} ->
-    #     IO.puts("Usermail: #{useremail} - Received message: #{msg} - Process: " <> inspect(pid))
-    #     serve(useremail)
-    # end
     receive do
-      x ->
-        IO.inspect(x)
+      {:message, msg} ->
+        Logger.info("Received message for #{useremail}: #{msg}")
         serve(useremail)
     end
   end
