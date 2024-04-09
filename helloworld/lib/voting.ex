@@ -12,6 +12,10 @@ defmodule Voting do
   end
 
   def subscribe(useremail) do
+    current = Application.get_env(:voting, :config)
+
+    IO.inspect(current)
+
     {:ok, _} = Voting.Broker.subscribe(Voting.Broker, useremail, fn -> serve(useremail) end)
   end
 
