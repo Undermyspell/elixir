@@ -5,7 +5,8 @@ defmodule Voting do
   def start(_type, _args) do
     children = [
       {Task.Supervisor, name: Voting.TaskSupervisor},
-      {Voting.Broker, name: Voting.Broker}
+      {Voting.Broker, name: Voting.Broker},
+      {Voting.Redis, name: Voting.Redis}
     ]
 
     Supervisor.start_link(children, strategy: :one_for_one, name: Voting.Supervisor)
