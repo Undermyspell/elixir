@@ -17,6 +17,13 @@ defmodule Voting do
 
     IO.inspect(current)
 
+    q = %Voting.Question{id: 12, creator: "its me", text: "Who am i?", votes: 3}
+
+    conn = Voting.Redis.get_connection()
+
+    IO.inspect(conn)
+    Voting.Redis.addQuestion(conn, q)
+
     {:ok, _} = Voting.Broker.subscribe(Voting.Broker, useremail, fn -> serve(useremail) end)
   end
 
