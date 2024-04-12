@@ -22,6 +22,7 @@ defmodule Voting do
     conn = Voting.Redis.get_connection()
 
     IO.inspect(conn)
+    Voting.Redis.start_session(conn)
     Voting.Redis.addQuestion(conn, q)
 
     {:ok, _} = Voting.Broker.subscribe(Voting.Broker, useremail, fn -> serve(useremail) end)

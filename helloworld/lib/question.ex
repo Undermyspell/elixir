@@ -9,16 +9,19 @@ defmodule Voting.Question do
           text: String.t()
         }
 
+  defguard is_even(term) when is_integer(term) and rem(term, 2) == 0
+
   @doc """
   Looks up the bucket pid for `name` stored in `server`.
 
   Returns `{:ok, pid}` if the bucket exists, `:error` otherwise.
   """
+  @spec create(nonempty_maybe_improper_list()) :: {:error, String.t()} | {:ok, struct()}
+  def create(question) when is_list(question) and hd(question) |> is_map() do
+    qM = hd(question)
 
-  @spec create(map()) :: {:error, String.t()} | {:ok, struct()}
-  def create(question) when is_map(question) do
     newQ =
-      question
+      qM
       |> Enum.map(fn {key, value} -> {String.to_atom(key), value} end)
       |> Map.new()
 

@@ -16,6 +16,13 @@ defmodule Voting.Redis do
     Agent.get(Voting.Redis, fn conn -> conn end)
   end
 
+  def start_session(conn) do
+    session = %{Questions: %{}}
+    {:ok, val} = Jason.encode(session)
+    Redix.command(conn, ["JSON.DEL", "Voting"])
+    Redix.command(conn, ["JSON.SET", "Voting", "$", val])
+  end
+
   @doc """
   Adds a new question to the current voting session
   """
@@ -24,7 +31,7 @@ defmodule Voting.Redis do
     {:ok, val} = Jason.encode(question)
 
     with {:ok, res} <-
-           Redix.command(conn, ["JSON.SET", "Voting", "$", val]) do
+           Redix.command(conn, ["JSON.SET", "Voting", "$.Questions.#{question.id}", val]) do
       IO.puts(res)
     else
       {:error, err} ->
@@ -32,11 +39,15 @@ defmodule Voting.Redis do
         IO.inspect(err)
     end
 
-    {:ok, res} = Redix.command(conn, ["JSON.GET", "Voting"])
+    {:ok, res} = Redix.command(conn, ["JSON.GET", "Voting", "$.Questions.#{question.id}"])
     {:ok, dec} = Jason.decode(res)
 
-    q = Voting.Question.create(dec)
-    IO.inspect(q)
+    try do
+      q = Voting.Question.create(dec)
+      IO.inspect(q)
+    rescue
+      e in FunctionClauseError -> IO.inspect(e)
+    end
 
     nil
   end
