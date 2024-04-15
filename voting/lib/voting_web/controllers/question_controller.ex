@@ -4,7 +4,12 @@ defmodule VotingWeb.QuestionController do
   alias Voting.VotingSession
   alias Voting.VotingSession.Question
 
-  action_fallback VotingWeb.FallbackController
+  action_fallback(VotingWeb.FallbackController)
+
+  def helloworld(conn, params) do
+    IO.inspect(params)
+    json(conn, %{Hello: "World"})
+  end
 
   def index(conn, _params) do
     questions = VotingSession.list_questions()
@@ -26,11 +31,15 @@ defmodule VotingWeb.QuestionController do
   end
 
   def update(conn, %{"id" => id, "question" => question_params}) do
-    question = VotingSession.get_question!(id)
+    IO.inspect(question_params)
+    IO.inspect(id)
+    json(conn, %{Updated: "Question"})
 
-    with {:ok, %Question{} = question} <- VotingSession.update_question(question, question_params) do
-      render(conn, :show, question: question)
-    end
+    # question = VotingSession.get_question!(id)
+
+    # with {:ok, %Question{} = question} <- VotingSession.update_question(question, question_params) do
+    #   render(conn, :show, question: question)
+    # end
   end
 
   def delete(conn, %{"id" => id}) do

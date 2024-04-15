@@ -40,7 +40,9 @@ defmodule Voting.MixProject do
       {:bandit, "~> 1.2"},
       {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
       {:redix, "~> 1.1"},
-      {:castore, ">= 0.0.0"}
+      {:castore, ">= 0.0.0"},
+      {:joken, "~> 2.6"},
+      {:joken_jwks, "~> 1.6.0"}
     ]
   end
 
