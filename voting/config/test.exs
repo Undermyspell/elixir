@@ -16,3 +16,9 @@ config :phoenix, :plug_init_mode, :runtime
 config :phoenix_live_view,
   # Enable helpful, but potentially expensive runtime checks
   enable_expensive_runtime_checks: true
+
+config :joken,
+  hs256: [
+    signer_alg: "HS256",
+    key_octet: "test"
+  ]

@@ -8,21 +8,25 @@ defmodule Voting.Shared.Auth.Token do
     strategy: Voting.Shared.Auth.KeycloakStrategy
   )
 
+  # @impl true
+  # def token_config do
+  #   default_claims(skip: [:aud, :iss])
+  #   |> add_claim("aud", nil, &(&1 === "myaudy"))
+  # end
+
   @impl true
   def token_config do
     default_claims(skip: [:aud, :iss])
     |> add_claim("aud", nil, &Enum.member?(&1, "party-ext"))
-
-    # |> add_claim("exp", nil, fn _ -> true end)
+    |> add_claim("exp", nil, fn _ -> true end)
   end
 end
 
 defmodule Voting.Shared.Auth.KeycloakStrategy do
   use JokenJwks.DefaultStrategyTemplate
 
-  def init_opts(opts),
-    do: [
-      jwks_url:
-        "https://keycloak.omnect.conplement.cloud/realms/cp-prod/protocol/openid-connect/certs"
-    ]
+  def init_opts(opts) do
+    url = "https://keycloak.omnect.conplement.cloud/realms/cp-prod/protocol/openid-connect/certs"
+    Keyword.merge(opts, jwks_url: url)
+  end
 end

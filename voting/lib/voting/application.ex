@@ -11,7 +11,7 @@ defmodule Voting.Application do
       VotingWeb.Telemetry,
       {DNSCluster, query: Application.get_env(:voting, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: Voting.PubSub},
-      {Voting.Shared.Auth.KeycloakStrategy, time_interval: 2_000},
+      {Voting.Shared.Auth.KeycloakStrategy, [time_interval: 60_000, log_level: :warn]},
       # Start a worker by calling: Voting.Worker.start_link(arg)
       # {Voting.Worker, arg},
       # Start to serve requests, typically the last entry

@@ -11,6 +11,23 @@ defmodule VotingWeb.QuestionController do
     json(conn, %{Hello: "World"})
   end
 
+  def token(conn, _params) do
+    extra_claims = %{"user_id" => "some_id", "aud" => "myaudy"}
+
+    token_with_default_plus_custom_claims =
+      Voting.Shared.Auth.Token.generate_and_sign!(extra_claims)
+
+    signer = Joken.Signer.create("HS256", "abcdefg")
+
+    token_with_default_plus_custom_claims2 =
+      Voting.Shared.Auth.Token.generate_and_sign!(extra_claims, signer)
+
+    json(conn, %{
+      Token: token_with_default_plus_custom_claims,
+      Token2: token_with_default_plus_custom_claims2
+    })
+  end
+
   def index(conn, _params) do
     questions = VotingSession.list_questions()
     render(conn, :index, questions: questions)
