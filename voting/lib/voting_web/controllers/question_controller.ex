@@ -15,7 +15,7 @@ defmodule VotingWeb.QuestionController do
     extra_claims = %{"user_id" => "some_id", "aud" => "myaudy"}
 
     token_with_default_plus_custom_claims =
-      Voting.Shared.Auth.Token.generate_and_sign!(extra_claims)
+      Voting.Shared.Auth.Token.generate_and_sign!(extra_claims, :hs256)
 
     signer = Joken.Signer.create("HS256", "abcdefg")
 
@@ -43,7 +43,13 @@ defmodule VotingWeb.QuestionController do
   end
 
   def show(conn, %{"id" => id}) do
-    question = VotingSession.get_question!(id)
+    question =
+      try do
+        VotingSession.get_question!(id)
+      rescue
+        _ -> {:error}
+      end
+
     render(conn, :show, question: question)
   end
 
@@ -60,10 +66,16 @@ defmodule VotingWeb.QuestionController do
   end
 
   def delete(conn, %{"id" => id}) do
-    question = VotingSession.get_question!(id)
-
-    with {:ok, %Question{}} <- VotingSession.delete_question(question) do
+    try do
+      question = VotingSession.get_question!(id)
+      VotingSession.delete_question(question)
       send_resp(conn, :no_content, "")
+    rescue
+      _ -> IO.puts("error")
     end
+
+    # with {:ok, %Question{}} <- VotingSession.delete_question(question) do
+    #   send_resp(conn, :no_content, "")
+    # end
   end
 end

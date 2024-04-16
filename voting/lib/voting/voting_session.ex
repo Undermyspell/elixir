@@ -17,7 +17,7 @@ defmodule Voting.VotingSession do
 
   """
   def list_questions do
-    raise "TODO"
+    "asd"
   end
 
   @doc """
@@ -46,7 +46,7 @@ defmodule Voting.VotingSession do
 
   """
   def create_question(attrs \\ %{}) do
-    raise "TODO"
+    attrs
   end
 
   @doc """

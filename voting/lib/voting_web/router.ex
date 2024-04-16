@@ -1,5 +1,6 @@
 defmodule VotingWeb.Router do
   use VotingWeb, :router
+  @dialyzer {:nowarn_function, verify_token: 1}
 
   pipeline :auth do
     plug(:require_auth)
@@ -37,10 +38,11 @@ defmodule VotingWeb.Router do
   end
 
   defp verify_token(token) do
-    if Mix.env() === "test" do
+    if Mix.env() === :test do
       Voting.Shared.Auth.Token.verify_and_validate(token)
     else
-      Joken.Signer.verify(token, Joken.Signer.parse_config(:hs256))
+      config = Joken.Signer.parse_config(:hs256)
+      Joken.Signer.verify(token, config)
     end
   end
 end

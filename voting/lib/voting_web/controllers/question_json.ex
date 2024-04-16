@@ -8,6 +8,18 @@ defmodule VotingWeb.QuestionJSON do
     %{data: for(question <- questions, do: data(question))}
   end
 
+  @spec show(%{:question => Voting.VotingSession.Question.t(), optional(any()) => any()}) :: %{
+          data: %{
+            anonymous: any(),
+            answered: any(),
+            creatorHash: any(),
+            creatorName: any(),
+            id: any(),
+            text: any(),
+            voted: any(),
+            votes: any()
+          }
+        }
   @doc """
   Renders a single question.
   """
