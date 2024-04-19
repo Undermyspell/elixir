@@ -44,9 +44,9 @@ defmodule VotingWeb.QuestionControllerTest do
     setup [:get_user_token]
 
     test "200 succes with hello world text", %{conn: conn, token: token} do
-      IO.puts("TestToken " <> token)
+      conn = put_req_header(conn, "authorization", "Bearer #{token}")
       conn = get(conn, ~p"/api/helloworld")
-      assert json_response(conn, 200)["data"] == %{Hello: "World"}
+      assert json_response(conn, 200) == %{"Hello" => "World"}
     end
   end
 

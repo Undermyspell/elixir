@@ -42,7 +42,8 @@ defmodule Voting.MixProject do
       {:redix, "~> 1.1"},
       {:castore, ">= 0.0.0"},
       {:joken, "~> 2.6"},
-      {:joken_jwks, "~> 1.6.0"}
+      {:joken_jwks, "~> 1.6.0"},
+      {:dotenvy, "~> 0.8.0"}
     ]
   end
 

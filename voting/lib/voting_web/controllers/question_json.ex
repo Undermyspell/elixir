@@ -27,6 +27,13 @@ defmodule VotingWeb.QuestionJSON do
     %{data: data(question)}
   end
 
+  def token(%{Token: token, Token2: token2}) do
+    %{
+      Token: token,
+      Token2: token2
+    }
+  end
+
   defp data(%Question{} = question) do
     %{
       id: question.id,

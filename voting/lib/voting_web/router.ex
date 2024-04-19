@@ -16,6 +16,7 @@ defmodule VotingWeb.Router do
     resources("/questions", QuestionController, except: [:new, :edit])
 
     get("/helloworld", QuestionController, :helloworld)
+    post("/start", QuestionController, :start_session)
   end
 
   scope "/api/token", VotingWeb do
@@ -27,7 +28,6 @@ defmodule VotingWeb.Router do
   def require_auth(conn, _opts) do
     with ["Bearer " <> token] <- get_req_header(conn, "authorization"),
          {:ok, claims} <- verify_token(token) do
-      IO.puts(token)
       assign(conn, :current_user_claims, claims)
     else
       _ ->

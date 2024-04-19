@@ -7,21 +7,21 @@ defmodule Voting.VotingSessionFixtures do
   @doc """
   Generate a question.
   """
-  def question_fixture(attrs \\ %{}) do
-    {:ok, question} =
-      attrs
-      |> Enum.into(%{
-        anonymous: true,
-        answered: true,
-        creatorHash: "some creatorHash",
-        creatorName: "some creatorName",
-        id: "some id",
-        text: "some text",
-        voted: true,
-        votes: 42
-      })
-      |> Voting.VotingSession.create_question()
+  # def question_fixture(attrs \\ %{}) do
+  #   {:ok, question} =
+  #     attrs
+  #     |> Enum.into(%{
+  #       anonymous: true,
+  #       answered: true,
+  #       creatorHash: "some creatorHash",
+  #       creatorName: "some creatorName",
+  #       id: "some id",
+  #       text: "some text",
+  #       voted: true,
+  #       votes: 42
+  #     })
+  #     |> Voting.VotingSession.create_question()
 
-    question
-  end
+  #   question
+  # end
 end
