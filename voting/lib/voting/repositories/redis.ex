@@ -77,7 +77,7 @@ defmodule Voting.Repositories.Redis do
     {:ok, conn} = Redix.start_link(host: host, port: port, password: password)
 
     Logger.info("Connected to Redis")
-    IO.inspect(conn)
+    IO.puts("ALALALALALAAL")
     conn
   end
 end

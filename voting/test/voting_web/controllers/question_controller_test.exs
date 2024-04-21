@@ -1,5 +1,5 @@
 defmodule VotingWeb.QuestionControllerTest do
-  use VotingWeb.ConnCase
+  use VotingWeb.ConnCase, async: true
 
   import Voting.VotingSessionFixtures
 
@@ -41,13 +41,54 @@ defmodule VotingWeb.QuestionControllerTest do
   end
 
   describe "helloworld" do
-    setup [:get_user_token]
+    # setup [:get_user_token]
 
-    test "200 succes with hello world text", %{conn: conn, token: token} do
-      conn = put_req_header(conn, "authorization", "Bearer #{token}")
-      conn = get(conn, ~p"/api/helloworld")
-      assert json_response(conn, 200) == %{"Hello" => "World"}
+    test "200 succes with hello world text", %{conn: conn} do
+      # %{token: token} = get_user_token(123)
+
+      tasks =
+        1..5
+        |> Enum.map(&get_user_token(&1))
+        |> Enum.map(&Task.async(fn -> sendr(conn, &1.token) end))
+
+      # tasks = [
+      #   Task.async(fn -> sendr(conn, token) end),
+      #   Task.async(fn -> sendr(conn, token) end)
+      # ]
+
+      # c = conn
+      # c = put_req_header(c, "authorization", "Bearer #{token}")
+      # c = get(c, ~p"/api/helloworld")
+
+      res = Task.await_many(tasks)
+
+      Enum.each(res, &(json_response(&1, 200) |> IO.inspect()))
+
+      # assert json_response(c, 200) == %{"Hello" => "World"}
+      assert Enum.all?(res, &(json_response(&1, 200) == %{"Hello" => "World"}))
     end
+  end
+
+  describe "start_session" do
+    # setup [:get_user_token]
+
+    # test "200 succes with hello world text", %{conn: conn, token: token} do
+    test "201 sucess started session", %{conn: conn} do
+      %{token: token} = get_user_token(1)
+
+      conn =
+        conn
+        |> put_req_header("authorization", "Bearer #{token}")
+        |> post(~p"/api/start")
+
+      assert response(conn, 201) == ""
+    end
+  end
+
+  defp sendr(conn, token) do
+    conn
+    |> put_req_header("authorization", "Bearer #{token}")
+    |> get(~p"/api/helloworld")
   end
 
   # describe "create question" do
@@ -120,13 +161,18 @@ defmodule VotingWeb.QuestionControllerTest do
   #   end
   # end
 
-  defp create_question(_) do
-    question = question_fixture()
-    %{question: question}
+  # defp create_question(_) do
+  #   question = question_fixture()
+  #   %{question: question}
+  # end
+
+  defp get_user_token() do
+    get_user_token(1)
   end
 
-  defp get_user_token(_) do
-    extra_claims = %{"user_id" => "tester", "aud" => "testaud"}
+  defp get_user_token(id) do
+    IO.puts(id)
+    extra_claims = %{"user_id" => "tester_" <> Integer.to_string(id), "aud" => "testaud"}
 
     token = Voting.Shared.Auth.Token.generate_and_sign!(extra_claims, :hs256)
     %{token: token}
