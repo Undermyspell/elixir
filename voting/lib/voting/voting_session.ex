@@ -6,6 +6,8 @@ defmodule Voting.VotingSession do
   #   alias Voting.Repo
 
   # alias Voting.VotingSession.Question
+  require Logger
+  alias Voting.Models.Question
   alias Voting.Repositories.Redis
 
   #   @doc """
@@ -35,6 +37,23 @@ defmodule Voting.VotingSession do
   @spec start_session() :: {:error} | {:ok}
   def start_session() do
     Redis.get_connection() |> Redis.start_session()
+  end
+
+  @spec create_question(Voting.DTO.NewQuestion.t()) :: {:error} | {:ok}
+  def create_question(%Voting.DTO.NewQuestion{} = newQuestion) do
+    case Redis.get_connection() |> Redis.addQuestion(newQuestion.text, newQuestion.anonymous, "test1", "test2") do
+      {:ok, _} ->
+        {:ok}
+
+      {:error, err} ->
+        Logger.error(err)
+        {:error}
+    end
+  end
+
+  @spec get_session() :: {:ok, [Question.t()]} | {:error}
+  def get_session() do
+    Redis.get_connection() |> Redis.getQuestions()
   end
 
   #   @doc """

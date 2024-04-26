@@ -1,25 +1,14 @@
 defmodule VotingWeb.QuestionJSON do
-  alias Voting.VotingSession.Question
+  alias Voting.Models.Question
 
   @doc """
   Renders a list of questions.
   """
-  def index(%{questions: questions}) do
-    %{data: for(question <- questions, do: data(question))}
+  @spec questions(%{:questions => list()}) :: list()
+  def questions(%{questions: questions}) do
+    for(question <- questions, do: data(question))
   end
 
-  @spec show(%{:question => Voting.VotingSession.Question.t(), optional(any()) => any()}) :: %{
-          data: %{
-            anonymous: any(),
-            answered: any(),
-            creatorHash: any(),
-            creatorName: any(),
-            id: any(),
-            text: any(),
-            voted: any(),
-            votes: any()
-          }
-        }
   @doc """
   Renders a single question.
   """

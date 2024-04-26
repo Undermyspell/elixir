@@ -13,10 +13,12 @@ defmodule VotingWeb.Router do
   scope "/api", VotingWeb do
     pipe_through([:api, :auth])
 
-    resources("/questions", QuestionController, except: [:new, :edit])
+    # resources("/questions", QuestionController, except: [:new, :edit])
 
     get("/helloworld", QuestionController, :helloworld)
     post("/start", QuestionController, :start_session)
+    post("/new", QuestionController, :new_question)
+    get("/session", QuestionController, :get_session)
   end
 
   scope "/api/token", VotingWeb do
@@ -38,7 +40,7 @@ defmodule VotingWeb.Router do
   end
 
   defp verify_token(token) do
-    if Mix.env() !== :test do
+    if Mix.env() === :test do
       Voting.Shared.Auth.Token.verify_and_validate(token)
     else
       config = Joken.Signer.parse_config(:hs256)
