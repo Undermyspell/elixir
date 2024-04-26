@@ -10,7 +10,7 @@ defmodule VotingWeb.QuestionController do
 
     claims = Map.get(conn, :assigns) |> Map.get(:current_user_claims)
     # claims = get_session(conn, :current_user_claims)
-    IO.inspect(claims)
+    Logger.info(claims)
     json(conn, %{Hello: "World"})
   end
 

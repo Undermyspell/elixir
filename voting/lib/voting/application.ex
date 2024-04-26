@@ -7,11 +7,6 @@ defmodule Voting.Application do
 
   @impl true
   def start(_type, _args) do
-    current = Application.get_env(:voting, :redis)
-
-    IO.inspect(current)
-    IO.puts(System.get_env("REDIS_HOST"))
-
     children = [
       VotingWeb.Telemetry,
       {DNSCluster, query: Application.get_env(:voting, :dns_cluster_query) || :ignore},

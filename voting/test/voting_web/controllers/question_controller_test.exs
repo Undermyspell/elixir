@@ -3,6 +3,7 @@ defmodule VotingWeb.QuestionControllerTest do
 
   import Voting.VotingSessionFixtures
 
+  require Logger
   alias Voting.VotingSession.Question
 
   @create_attrs %{
@@ -49,7 +50,7 @@ defmodule VotingWeb.QuestionControllerTest do
       tasks =
         1..5
         |> Enum.map(&get_user_token(&1))
-        |> Enum.map(&Task.async(fn -> sendr(conn, &1.token) end))
+        |> Enum.map(&Task.async(fn -> sendRequest(conn, &1.token) end))
 
       # tasks = [
       #   Task.async(fn -> sendr(conn, token) end),
@@ -62,7 +63,7 @@ defmodule VotingWeb.QuestionControllerTest do
 
       res = Task.await_many(tasks)
 
-      Enum.each(res, &(json_response(&1, 200) |> IO.inspect()))
+      Enum.each(res, &(json_response(&1, 200) |> Logger.info()))
 
       # assert json_response(c, 200) == %{"Hello" => "World"}
       assert Enum.all?(res, &(json_response(&1, 200) == %{"Hello" => "World"}))
@@ -85,7 +86,7 @@ defmodule VotingWeb.QuestionControllerTest do
     end
   end
 
-  defp sendr(conn, token) do
+  defp sendRequest(conn, token) do
     conn
     |> put_req_header("authorization", "Bearer #{token}")
     |> get(~p"/api/helloworld")
