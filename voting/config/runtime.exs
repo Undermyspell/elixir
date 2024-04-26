@@ -21,13 +21,15 @@ if System.get_env("PHX_SERVER") do
   config :voting, VotingWeb.Endpoint, server: true
 end
 
-source!([".env", System.get_env()])
+if config_env() != :test do
+  source!([".env", System.get_env()])
 
-config :voting, :redis, %{
-  host: env!("REDIS_HOST", :string!),
-  password: env!("REDIS_PASSWORD", :string!),
-  port: env!("REDIS_PORT", :integer!)
-}
+  config :voting, :redis, %{
+    host: env!("REDIS_HOST", :string!),
+    password: env!("REDIS_PASSWORD", :string!),
+    port: env!("REDIS_PORT", :integer!)
+  }
+end
 
 if config_env() == :prod do
   # The secret key base is used to sign/encrypt cookies and other secrets.
