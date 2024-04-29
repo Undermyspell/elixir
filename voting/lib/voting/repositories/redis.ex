@@ -7,6 +7,7 @@ defmodule Voting.Repositories.Redis do
 
   @spec start_link() :: {:error, any()} | {:ok, pid()}
   def start_link(opts \\ []) do
+    Logger.info(opts)
     Agent.start_link(fn -> connect() end, opts)
   end
 

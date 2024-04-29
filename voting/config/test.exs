@@ -22,3 +22,6 @@ config :joken,
     signer_alg: "HS256",
     key_octet: "test"
   ]
+
+config :testcontainers,
+  enabled: true

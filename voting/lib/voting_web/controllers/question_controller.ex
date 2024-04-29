@@ -1,6 +1,6 @@
 defmodule VotingWeb.QuestionController do
   require Logger
-  alias Voting.VotingSession
+  alias Voting.UseCases
   use VotingWeb, :controller
 
   action_fallback(VotingWeb.FallbackController)
@@ -37,7 +37,7 @@ defmodule VotingWeb.QuestionController do
   end
 
   def start_session(conn, _params) do
-    case Voting.VotingSession.start_session() do
+    case UseCases.StartSession.start_session() do
       {:ok} ->
         conn
         |> send_resp(201, "")
@@ -51,7 +51,7 @@ defmodule VotingWeb.QuestionController do
   def new_question(conn, %{"text" => text, "anonymous" => anonymous}) do
     newQuestion = %Voting.DTO.NewQuestion{anonymous: anonymous, text: text}
 
-    if VotingSession.create_question(newQuestion) == {:ok} do
+    if UseCases.CreateQuestion.create_question(newQuestion) == {:ok} do
       send_resp(conn, 200, "")
     else
       send_resp(conn, 500, "")
@@ -63,7 +63,7 @@ defmodule VotingWeb.QuestionController do
   end
 
   def get_session(conn, _params) do
-    case VotingSession.get_session() do
+    case UseCases.GetSession.get_session() do
       {:ok, questions} -> render(conn, :questions, questions: questions)
       {:error} -> send_resp(conn, 500, "")
     end
