@@ -5,11 +5,10 @@ defmodule Voting.Repositories.Redis do
   alias Voting.Models.Question
   alias Voting.Repositories.RedisQuestion
 
+  @votingRootKey "Voting"
+
   @spec start_link() :: {:error, any()} | {:ok, pid()}
   def start_link(opts \\ []) do
-    Logger.info(opts[:host])
-    Logger.info(opts[:password])
-    Logger.info(opts[:port])
     Agent.start_link(fn -> connect(opts[:host], opts[:password], opts[:port]) end, opts)
   end
 
@@ -25,9 +24,9 @@ defmodule Voting.Repositories.Redis do
     try do
       with {:ok, val} <- Jason.encode(session),
            {:ok, _} <-
-             Redix.command(conn, ["JSON.DEL", "Voting"]),
+             Redix.command(conn, ["JSON.DEL", @votingRootKey]),
            {:ok, _} <-
-             Redix.command(conn, ["JSON.SET", "Voting", "$", val]) do
+             Redix.command(conn, ["JSON.SET", @votingRootKey, "$", val]) do
         {:ok}
       else
         {:error, err} ->
@@ -57,7 +56,7 @@ defmodule Voting.Repositories.Redis do
     {:ok, val} = Jason.encode(newQ)
 
     with {:ok, res} <-
-           Redix.command(conn, ["JSON.SET", "Voting", "$.Questions.#{newQ.id}", val]) do
+           Redix.command(conn, ["JSON.SET", @votingRootKey, "$.Questions.#{newQ.id}", val]) do
       IO.puts(res)
       q = Question.create(newQ)
       {:ok, q}
@@ -72,7 +71,7 @@ defmodule Voting.Repositories.Redis do
           {:ok, [Question.t()]} | {:error}
   def getQuestions(conn) do
     try do
-      {:ok, res} = Redix.command(conn, ["JSON.GET", "Voting", ".Questions"])
+      {:ok, res} = Redix.command(conn, ["JSON.GET", @votingRootKey, ".Questions"])
       {:ok, dec} = Jason.decode(res)
 
       questions =
@@ -90,6 +89,14 @@ defmodule Voting.Repositories.Redis do
       e ->
         Logger.error(e)
         {:error}
+    end
+  end
+
+  @spec isRunning(pid()) :: boolean()
+  def isRunning(conn) do
+    case Redix.command(conn, ["JSON.GET", @votingRootKey, ".Questions"]) do
+      {:ok, _} -> true
+      {:error, _} -> false
     end
   end
 

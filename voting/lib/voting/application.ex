@@ -18,10 +18,8 @@ defmodule Voting.Application do
           case Testcontainers.start_container(config) do
             {:ok, container} ->
               port = Testcontainers.Container.mapped_port(container, 6379)
-              Logger.info(port)
               host = Testcontainers.get_host()
-              Logger.info(host)
-              IO.inspect("Redis testcontainer started on #{host}:#{port}")
+              Logger.info("Redis testcontainer started on #{host}:#{port}")
               %{host: host, password: nil, port: port}
 
             {:error, reason} ->
@@ -36,7 +34,7 @@ defmodule Voting.Application do
       VotingWeb.Telemetry,
       {DNSCluster, query: Application.get_env(:voting, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: Voting.PubSub},
-      {Voting.Shared.Auth.KeycloakStrategy, [time_interval: 60_000, log_level: :warn]},
+      {Voting.Shared.Auth.KeycloakStrategy, time_interval: 60_000, log_level: :warn},
       {Voting.Repositories.Redis,
        name: Voting.Repositories.Redis, host: host, port: port, password: password},
       # Start a worker by calling: Voting.Worker.start_link(arg)

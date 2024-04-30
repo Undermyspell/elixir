@@ -64,8 +64,14 @@ defmodule VotingWeb.QuestionController do
 
   def get_session(conn, _params) do
     case UseCases.GetSession.get_session() do
-      {:ok, questions} -> render(conn, :questions, questions: questions)
-      {:error} -> send_resp(conn, 500, "")
+      {:ok, questions} ->
+        render(conn, :questions, questions: questions)
+
+      {:question_session_not_running, reason} ->
+        conn |> send_resp(406, reason)
+
+      {:error} ->
+        send_resp(conn, 500, "")
     end
   end
 

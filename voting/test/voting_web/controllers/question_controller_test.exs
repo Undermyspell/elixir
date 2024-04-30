@@ -5,36 +5,36 @@ defmodule VotingWeb.QuestionControllerTest do
 
   require Logger
 
-  @create_attrs %{
-    anonymous: true,
-    answered: true,
-    creatorHash: "some creatorHash",
-    creatorName: "some creatorName",
-    id: "some id",
-    text: "some text",
-    voted: true,
-    votes: 42
-  }
-  @update_attrs %{
-    anonymous: false,
-    answered: false,
-    creatorHash: "some updated creatorHash",
-    creatorName: "some updated creatorName",
-    id: "some updated id",
-    text: "some updated text",
-    voted: false,
-    votes: 43
-  }
-  @invalid_attrs %{
-    anonymous: nil,
-    answered: nil,
-    creatorHash: nil,
-    creatorName: nil,
-    id: nil,
-    text: nil,
-    voted: nil,
-    votes: nil
-  }
+  # @create_attrs %{
+  #   anonymous: true,
+  #   answered: true,
+  #   creatorHash: "some creatorHash",
+  #   creatorName: "some creatorName",
+  #   id: "some id",
+  #   text: "some text",
+  #   voted: true,
+  #   votes: 42
+  # }
+  # @update_attrs %{
+  #   anonymous: false,
+  #   answered: false,
+  #   creatorHash: "some updated creatorHash",
+  #   creatorName: "some updated creatorName",
+  #   id: "some updated id",
+  #   text: "some updated text",
+  #   voted: false,
+  #   votes: 43
+  # }
+  # @invalid_attrs %{
+  #   anonymous: nil,
+  #   answered: nil,
+  #   creatorHash: nil,
+  #   creatorName: nil,
+  #   id: nil,
+  #   text: nil,
+  #   voted: nil,
+  #   votes: nil
+  # }
 
   setup %{conn: conn} do
     {:ok, conn: put_req_header(conn, "accept", "application/json")}
@@ -166,9 +166,9 @@ defmodule VotingWeb.QuestionControllerTest do
   #   %{question: question}
   # end
 
-  defp get_user_token() do
-    get_user_token(1)
-  end
+  # defp get_user_token() do
+  #   get_user_token(1)
+  # end
 
   defp get_user_token(id) do
     IO.puts(id)
