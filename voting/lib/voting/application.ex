@@ -8,33 +8,37 @@ defmodule Voting.Application do
 
   @impl true
   def start(_type, _args) do
-    e = Application.get_env(:testcontainers, :enabled, false)
-    Logger.info(e)
+    %{host: host, password: password, port: port} =
+      case Application.get_env(:testcontainers, :enabled, false) do
+        true ->
+          Testcontainers.start_link()
+          config = Testcontainers.Container.new("redis/redis-stack:latest")
+          config = Testcontainers.Container.with_exposed_port(config, 6379)
 
-    if Application.get_env(:testcontainers, :enabled, false) == true do
-      Testcontainers.start_link()
-      config = Testcontainers.Container.new("redis/redis-stack:latest")
-      config = Testcontainers.Container.with_exposed_port(config, 6379)
+          case Testcontainers.start_container(config) do
+            {:ok, container} ->
+              port = Testcontainers.Container.mapped_port(container, 6379)
+              Logger.info(port)
+              host = Testcontainers.get_host()
+              Logger.info(host)
+              IO.inspect("Redis testcontainer started on #{host}:#{port}")
+              %{host: host, password: nil, port: port}
 
-      case Testcontainers.start_container(config) do
-        {:ok, container} ->
-          port = Testcontainers.Container.mapped_port(container, 6379)
-          Logger.info(port)
-          host = Testcontainers.get_host()
-          Logger.info(host)
-          IO.inspect("Redis testcontainer started on #{host}:#{port}")
+            {:error, reason} ->
+              Logger.error("Failed to start redis test container: #{reason}")
+          end
 
-        {:error, reason} ->
-          Logger.error("Failed to start redis test container: #{reason}")
+        false ->
+          Application.get_env(:voting, :redis)
       end
-    end
 
     children = [
       VotingWeb.Telemetry,
       {DNSCluster, query: Application.get_env(:voting, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: Voting.PubSub},
       {Voting.Shared.Auth.KeycloakStrategy, [time_interval: 60_000, log_level: :warn]},
-      {Voting.Repositories.Redis, name: Voting.Repositories.Redis, endpoint: "adasd"},
+      {Voting.Repositories.Redis,
+       name: Voting.Repositories.Redis, host: host, port: port, password: password},
       # Start a worker by calling: Voting.Worker.start_link(arg)
       # {Voting.Worker, arg},
       # Start to serve requests, typically the last entry

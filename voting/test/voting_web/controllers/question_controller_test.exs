@@ -4,7 +4,6 @@ defmodule VotingWeb.QuestionControllerTest do
   import Voting.VotingSessionFixtures
 
   require Logger
-  alias Voting.VotingSession.Question
 
   @create_attrs %{
     anonymous: true,

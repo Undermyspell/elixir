@@ -7,8 +7,10 @@ defmodule Voting.Repositories.Redis do
 
   @spec start_link() :: {:error, any()} | {:ok, pid()}
   def start_link(opts \\ []) do
-    Logger.info(opts)
-    Agent.start_link(fn -> connect() end, opts)
+    Logger.info(opts[:host])
+    Logger.info(opts[:password])
+    Logger.info(opts[:port])
+    Agent.start_link(fn -> connect(opts[:host], opts[:password], opts[:port]) end, opts)
   end
 
   @spec get_connection() :: pid()
@@ -91,9 +93,7 @@ defmodule Voting.Repositories.Redis do
     end
   end
 
-  defp connect() do
-    %{host: host, password: password, port: port} = Application.get_env(:voting, :redis)
-
+  defp connect(host, password, port) do
     {:ok, conn} = Redix.start_link(host: host, port: port, password: password)
 
     Logger.info("Connected to Redis")
