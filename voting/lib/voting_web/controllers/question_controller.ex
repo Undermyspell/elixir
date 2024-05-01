@@ -48,11 +48,23 @@ defmodule VotingWeb.QuestionController do
     end
   end
 
+  def end_session(conn, _params) do
+    case UseCases.EndSession.end_session() do
+      {:ok} ->
+        conn
+        |> send_resp(200, "")
+
+      {:error} ->
+        conn
+        |> send_resp(500, "")
+    end
+  end
+
   def new_question(conn, %{"text" => text, "anonymous" => anonymous}) do
     newQuestion = %Voting.DTO.NewQuestion{anonymous: anonymous, text: text}
 
     if UseCases.CreateQuestion.create_question(newQuestion) == {:ok} do
-      send_resp(conn, 200, "")
+      send_resp(conn, 201, "")
     else
       send_resp(conn, 500, "")
     end
@@ -68,7 +80,7 @@ defmodule VotingWeb.QuestionController do
         render(conn, :questions, questions: questions)
 
       {:question_session_not_running, reason} ->
-        conn |> send_resp(406, reason)
+        send_resp(conn, 406, reason)
 
       {:error} ->
         send_resp(conn, 500, "")

@@ -2,6 +2,7 @@ defmodule Voting.Repositories.Redis do
   use Agent
   require Logger
 
+  alias ElixirSense.Log
   alias Voting.Models.Question
   alias Voting.Repositories.RedisQuestion
 
@@ -17,6 +18,7 @@ defmodule Voting.Repositories.Redis do
     Agent.get(Voting.Repositories.Redis, fn conn -> conn end)
   end
 
+  @spec start_session(pid()) :: {:error} | {:ok}
   def start_session(conn) do
     sessionSecret = Voting.Shared.Helper.Utility.get_random_string()
     session = %{Questions: %{}, UserVotes: %{}, SessionSecret: sessionSecret}
@@ -36,6 +38,18 @@ defmodule Voting.Repositories.Redis do
     rescue
       e in Redix.Error ->
         Logger.error(e.message)
+        {:error}
+    end
+  end
+
+  @spec end_session(pid()) :: {:error} | {:ok}
+  def end_session(conn) do
+    case Redix.command(conn, ["JSON.DEL", @votingRootKey]) do
+      {:ok, _} ->
+        {:ok}
+
+      {:error, err} ->
+        Logger.error(err)
         {:error}
     end
   end
@@ -95,8 +109,15 @@ defmodule Voting.Repositories.Redis do
   @spec isRunning(pid()) :: boolean()
   def isRunning(conn) do
     case Redix.command(conn, ["JSON.GET", @votingRootKey, ".Questions"]) do
-      {:ok, _} -> true
-      {:error, _} -> false
+      {:ok, val} when val !== nil ->
+        true
+
+      {:ok, nil} ->
+        false
+
+      {:error, err} ->
+        Logger.error(err)
+        false
     end
   end
 
